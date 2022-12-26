@@ -156,77 +156,48 @@ class SalaryCalculatorGUI:
         netThread = threading.Thread(target=netButton_thread)
         netThread.start()
 
-    def __get_gross_from_net_loop(self, desiredNetSalary):
+    def __gradient_descent(self, desiredNetSalary):
         guess = desiredNetSalary * (1 + self.brackets[-1])
+        width = 0.5
+        prev_error = 0
+        prev_guess = 0
 
-        if desiredNetSalary > 100000:  # for large numbers set rate and width to 1% of the nearest power of ten
-            rate = 0.01 * pow(10, find_power(desiredNetSalary))
-            width = rate  # 0.5
+        calculated_net, _ = self.calculateNetSalary(guess)
+        error = abs(calculated_net - desiredNetSalary)
+        half_error_points = error
+
+        if desiredNetSalary > 10000:  # for large numbers set rate and width to 1% of the nearest power of ten
+            rate = 0.1 * pow(10, find_power(desiredNetSalary))
         else:
-            rate = 10
-            width = 10  # 0.5
+            rate = 0.7
 
-        calculated_income, _ = self.calculateNetSalary(guess)
-
-        while abs(calculated_income - desiredNetSalary) > width:
-            # rate *= 10
-            # width *= 5  # originally 10
-
-            if calculated_income < desiredNetSalary:
-                guess += rate
-            else:
-                guess -= rate
-            calculated_income, _ = self.calculateNetSalary(guess)
-        return guess, calculated_income
-
-    def __get_gross_from_net_combined(self, desiredNetIncome, first_guess=None):
-        if not first_guess:
-            first_guess, _ = self.__get_gross_from_net_loop(desiredNetIncome)
-
-        rate = 0.9  # maybe try 0.7
-
-        def adjust_guess(guess: float, desired_net, prev_error, prev_guess, depth=0):
+        iteration = 0
+        while error > width:
             calculated_net, _ = self.calculateNetSalary(guess)
-            error = abs(calculated_net - desired_net)
+            error = abs(calculated_net - desiredNetSalary)
+
             grad = (error - prev_error) / (guess - prev_guess)
+            prev_guess = guess
+            prev_error = error
+            guess -= grad * rate
 
-            if depth > 800 or (error - prev_error) > 0 and depth > 0:
-                return round(guess, 2), round(calculated_net, 2)
+            if desiredNetSalary >= 10000 and error < 0.5 * half_error_points:  # when the error reduces
+                # to half the previous point, half the learning rate
+                half_error_points = error
+                rate *= 0.5
+        iteration += 1
+        print(f"Iteration: {iteration}, Error: {error}, New Guess: {guess}")
 
-            if grad < 0:
-                prev_guess = guess
-                prev_error = error
-                guess += grad * rate
-            elif grad > 0:
-                prev_guess = guess
-                prev_error = error
-                guess -= grad * rate
-            return adjust_guess(guess, desired_net, prev_error, prev_guess, depth + 1)
-
-        return adjust_guess(first_guess, desiredNetIncome, 0, 0)
+        return guess, calculated_net
 
     @time_func
     def calculateGross(self, desiredNetIncome):
         if desiredNetIncome == 0:
             raise AttributeError
 
-        gross_loop, cd_income_loop = self.__get_gross_from_net_loop(desiredNetIncome)
+        gross, cd_income = self.__gradient_descent(desiredNetIncome)
 
-        if desiredNetIncome < 100000:
-            gross_combined, cd_income_combined = self.__get_gross_from_net_combined(desiredNetIncome, gross_loop)
-        else:
-            gross_combined = 0.0
-            cd_income_combined = 0.0
-
-        # return the result with the least error
-        if abs(cd_income_combined - desiredNetIncome) <= abs(cd_income_loop - desiredNetIncome):
-            print("Combined (loop + recursive)")
-            return gross_combined
-        if abs(cd_income_loop - desiredNetIncome) <= abs(cd_income_combined - desiredNetIncome):
-            print("Loop")
-            return gross_loop
-
-        return 0.0
+        return gross
 
     def handle_grossButton(self, event=None):
         def grossButton_thread():
@@ -253,6 +224,7 @@ def find_power(num, base=10):
         num /= base
         power += 1
     return power
+
 
 def main():
     root = Tk()
