@@ -180,7 +180,7 @@ class SalaryCalculatorGUI:
                 # to half the previous point, half the learning rate
                 half_error_points = error
                 rate *= 0.5
-        iteration += 1
+            iteration += 1
 
         print(f"Iteration: {iteration}, New Guess: {guess}")
         return guess, self.calculateNetSalary(guess)[0]

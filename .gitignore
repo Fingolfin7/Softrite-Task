@@ -152,4 +152,4 @@ cython_debug/
 #.idea/
 
 #everything else
-Plots/
+/Plots/
