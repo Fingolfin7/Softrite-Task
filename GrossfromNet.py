@@ -32,12 +32,13 @@ def draw_chart(points: list, label_name: str, second_points=None, second_label=N
     if not os.path.isdir("Plots/"):
         os.mkdir("Plots")
 
-    #plt.show()
     if second_points:
         plt.savefig(f"Plots/{label_name} and {second_label}({datetime.now().strftime('%m-%d-%Y')}).jpg")
     else:
         plt.savefig(f"Plots/{label_name}({datetime.now().strftime('%m-%d-%Y')}).jpg")
+
     plt.clf()
+
 
 @time_func
 def loop_gradient_descent(net_income):
@@ -69,7 +70,7 @@ def loop_gradient_descent(net_income):
 
         iteration += 1
 
-    print(f"Iteration: {iteration-1}, Error: {error}, New Guess: {guess}")
+    print(f"Iteration: {iteration}, Error: {error}, New Guess: {guess}")
     return guess, calculated_net
 
 
@@ -113,7 +114,7 @@ def loop_gradient_descent_annealed_lrate(net_income):
             # print(f"Halved learning rate. New Rate: {rate}")
         iteration += 1
 
-    print(f"Iteration: {iteration-1}, Error: {error}, New Guess: {guess}")
+    print(f"Iteration: {iteration}, Error: {error}, New Guess: {guess}")
 
     draw_chart(chart_error_points, "Error")
     draw_chart(chart_lrate_points, "Learning Rate")
@@ -150,7 +151,7 @@ def get_gross_from_net_loop(net_income):
         calculated_income = get_net_from_gross(guess)
         loop_count += 1
 
-    print(f"Loop_counter: {loop_count-1}, Error: {abs(calculated_income - net_income)}, last guess: {guess}")
+    print(f"Loop_counter: {loop_count}, Error: {abs(calculated_income - net_income)}, last guess: {guess}")
     return guess, calculated_income
 
 

@@ -1,4 +1,3 @@
-import threading
 from tkinter import *
 from tkinter import messagebox
 from datetime import datetime
@@ -141,20 +140,16 @@ class SalaryCalculatorGUI:
         return netSalary, regular_paye_this_period
 
     def handle_netButton(self, event=None):
-        def netButton_thread():
-            try:
-                gross_value = float(self.salary.get()) + float(self.benefits.get())
-                netSalary, paye_this_period = self.calculateNetSalary(gross_value)
-                self.netSalary.set(round(netSalary, 2))
-                self.payeThisPeriod.set(round(paye_this_period, 2))
-            except ArithmeticError as e:
-                messagebox.showwarning(
-                    f"Error!",
-                    f"Please enter in field data.\n{e}"
-                )
-
-        netThread = threading.Thread(target=netButton_thread)
-        netThread.start()
+        try:
+            gross_value = float(self.salary.get()) + float(self.benefits.get())
+            netSalary, paye_this_period = self.calculateNetSalary(gross_value)
+            self.netSalary.set(round(netSalary, 2))
+            self.payeThisPeriod.set(round(paye_this_period, 2))
+        except ArithmeticError as e:
+            messagebox.showwarning(
+                f"Error!",
+                f"Please enter in field data.\n{e}"
+            )
 
     def __gradient_descent(self, desiredNetSalary):
         guess = desiredNetSalary * (1 + self.brackets[-1])
@@ -186,9 +181,9 @@ class SalaryCalculatorGUI:
                 half_error_points = error
                 rate *= 0.5
         iteration += 1
-        print(f"Iteration: {iteration-1}, Error: {error}, New Guess: {guess}")
 
-        return guess, calculated_net
+        print(f"Iteration: {iteration}, New Guess: {guess}")
+        return guess, self.calculateNetSalary(guess)[0]
 
     @time_func
     def calculateGross(self, desiredNetIncome):
@@ -200,22 +195,18 @@ class SalaryCalculatorGUI:
         return gross
 
     def handle_grossButton(self, event=None):
-        def grossButton_thread():
-            try:
-                self.estimatedGrossIncome.set(0.0)  # clear while calculations run
-                net_income_value = float(self.desiredNetSalary.get())
-                calculated_gross = self.calculateGross(net_income_value)
-                self.estimatedGrossIncome.set(round(calculated_gross, 2))
-            except ArithmeticError as e:
-                messagebox.showwarning(
-                    f"Error!",
-                    f"Please enter in field data.\n{e}"
-                )
-            except AttributeError:
-                pass
-
-        grossThread = threading.Thread(target=grossButton_thread)
-        grossThread.start()
+        try:
+            self.estimatedGrossIncome.set(0.0)  # clear while calculations run
+            net_income_value = float(self.desiredNetSalary.get())
+            calculated_gross = self.calculateGross(net_income_value)
+            self.estimatedGrossIncome.set(round(calculated_gross, 2))
+        except ArithmeticError as e:
+            messagebox.showwarning(
+                f"Error!",
+                f"Please enter in field data.\n{e}"
+            )
+        except AttributeError:
+            pass
 
 
 def find_power(num, base=10):
