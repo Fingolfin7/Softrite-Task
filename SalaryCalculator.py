@@ -186,7 +186,7 @@ class SalaryCalculatorGUI:
                 half_error_points = error
                 rate *= 0.5
         iteration += 1
-        print(f"Iteration: {iteration}, Error: {error}, New Guess: {guess}")
+        print(f"Iteration: {iteration-1}, Error: {error}, New Guess: {guess}")
 
         return guess, calculated_net
 
