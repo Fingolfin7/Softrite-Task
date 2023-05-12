@@ -99,6 +99,10 @@ def loop_gradient_descent_annealed_lrate(net_income):
     while error > width:
         calculated_net = get_net_from_gross(guess)
         error = abs(calculated_net - net_income)
+
+        if error < width:
+            break
+
         grad = (error - prev_error) / (guess - prev_guess)
         prev_guess = guess
         prev_error = error

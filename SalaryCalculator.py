@@ -171,6 +171,9 @@ class SalaryCalculatorGUI:
             calculated_net, _ = self.calculateNetSalary(guess)
             error = abs(calculated_net - desiredNetSalary)
 
+            if error < width:
+                break
+
             grad = (error - prev_error) / (guess - prev_guess)
             prev_guess = guess
             prev_error = error
